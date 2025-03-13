@@ -3,12 +3,17 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 import os
 from datetime import datetime, timedelta
+import sys
+from pathlib import Path
 
 import pandas as pd
 from services.data import StockDataService
 from models.analysis import TechnicalAnalysis
 from services.signals import SignalService
 from services.analysis_service import MarketAnalysisService
+
+# appディレクトリをパスに追加
+sys.path.append(str(Path(__file__).parent))
 
 app = FastAPI(title="日経平均分析アプリ")
 
