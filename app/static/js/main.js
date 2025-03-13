@@ -61,9 +61,9 @@ async function fetchData(period) {
     try {
         console.log(`${period} のデータを取得中...`);
         
-        // ローディング表示
-        document.getElementById('latest-analysis').innerHTML = 
-            '<div class="text-center my-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">市場データを取得中...</p></div>';
+        // ローディング表示を削除
+        // document.getElementById('latest-analysis').innerHTML = 
+        //    '<div class="text-center my-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">市場データを取得中...</p></div>';
         
         // キャッシュを防止するためのタイムスタンプパラメータを追加
         const timestamp = new Date().getTime();
@@ -82,19 +82,21 @@ async function fetchData(period) {
             showToast("サンプルデータを表示中", "APIからのデータ取得に問題があり、サンプルデータを表示しています。", "warning");
         }
         
-        renderLatestAnalysis(data.latest);
+        // 最新分析表示を削除
+        // renderLatestAnalysis(data.latest);
         renderCharts(data.chart_data);
         
         // 基本データ取得後にAI分析も取得して両者を統合
         fetchAIAnalysis(period, data.latest);
     } catch (error) {
         console.error('エラーが発生しました:', error);
-        document.getElementById('latest-analysis').innerHTML = 
-            `<div class="alert alert-danger">
-                <h5>データ取得エラー</h5>
-                <p>${error.message}</p>
-                <p>再読み込みするには期間を選択し直してください。</p>
-            </div>`;
+        // エラー表示も削除
+        // document.getElementById('latest-analysis').innerHTML = 
+        //    `<div class="alert alert-danger">
+        //        <h5>データ取得エラー</h5>
+        //        <p>${error.message}</p>
+        //        <p>再読み込みするには期間を選択し直してください。</p>
+        //    </div>`;
     }
 }
 
@@ -154,59 +156,6 @@ function preprocessChartData(chartData) {
     });
     
     return sortedData;
-}
-
-// 最新の分析結果を表示
-function renderLatestAnalysis(latestData) {
-    const analysisDiv = document.getElementById('latest-analysis');
-    
-    // 指標のシグナル計算
-    const rsiSignal = getRsiSignal(latestData.rsi);
-    const macdSignal = latestData.macd > latestData.signal ? '買い' : '売り';
-    
-    // 総合シグナル計算
-    const overallSignal = calculateOverallSignal(latestData);
-    const signalClass = getSignalClass(overallSignal);
-    
-    // HTML生成
-    analysisDiv.innerHTML = `
-        <div class="text-center mb-3">
-            <h3 class="mb-0">¥${latestData.price.toLocaleString()}</h3>
-            <small class="text-muted">${latestData.date}</small>
-        </div>
-        
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0">市場シグナル</h5>
-            <span class="badge bg-${signalClass}">${overallSignal}</span>
-        </div>
-        
-        <div class="row mb-3">
-            <div class="col-6">
-                <div class="card">
-                    <div class="card-body p-2 text-center">
-                        <div class="small text-muted">RSI</div>
-                        <div class="indicator-value ${latestData.rsi > 70 ? 'rsi-overbought' : (latestData.rsi < 30 ? 'rsi-oversold' : 'rsi-neutral')}">
-                            ${latestData.rsi.toFixed(1)}
-                        </div>
-                        <span class="badge ${getRsiBadgeClass(latestData.rsi)}">${rsiSignal}</span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6">
-                <div class="card">
-                    <div class="card-body p-2 text-center">
-                        <div class="small text-muted">MACD</div>
-                        <div class="indicator-value">
-                            ${latestData.macd.toFixed(1)}
-                        </div>
-                        <span class="badge ${getMacdBadgeClass(latestData.macd, latestData.signal)}">${macdSignal}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <p class="mb-1">${getMarketSummary(latestData)}</p>
-    `;
 }
 
 // チャート描画関数
