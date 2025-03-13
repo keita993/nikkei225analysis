@@ -43,6 +43,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const period = document.getElementById('period-selector').value;
         fetchAIAnalysis(period);
     });
+
+    // タッチ操作の最適化
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    
+    if (isTouchDevice) {
+        // タッチデバイス向けの調整
+        document.body.classList.add('touch-device');
+        
+        // ホバー効果の代わりにアクティブ効果を強化
+        const interactiveElements = document.querySelectorAll('.btn, .nav-link, select, .card-header');
+        interactiveElements.forEach(el => {
+            el.addEventListener('touchstart', function() {
+                this.classList.add('touch-active');
+            });
+            el.addEventListener('touchend', function() {
+                this.classList.remove('touch-active');
+            });
+        });
+    }
 });
 
 // APIからデータを取得する関数
@@ -258,13 +277,23 @@ function renderCharts(chartData) {
                 tooltip: {
                     mode: 'index',
                     intersect: false,
+                },
+                labels: {
+                    font: {
+                        size: window.innerWidth < 768 ? 10 : 12
+                    }
                 }
             },
             scales: {
                 x: {
                     ticks: {
-                        maxTicksLimit: 10,
-                        maxRotation: 0
+                        maxRotation: 45,
+                        minRotation: 45,
+                        autoSkip: true,
+                        maxTicksLimit: window.innerWidth < 768 ? 6 : 12,
+                        font: {
+                            size: window.innerWidth < 768 ? 10 : 12
+                        }
                     },
                     grid: {
                         display: false
@@ -275,6 +304,9 @@ function renderCharts(chartData) {
                     ticks: {
                         callback: function(value) {
                             return '¥' + value.toLocaleString();
+                        },
+                        font: {
+                            size: window.innerWidth < 768 ? 10 : 12
                         }
                     }
                 }
@@ -331,13 +363,23 @@ function renderCharts(chartData) {
                 tooltip: {
                     mode: 'index',
                     intersect: false
+                },
+                labels: {
+                    font: {
+                        size: window.innerWidth < 768 ? 10 : 12
+                    }
                 }
             },
             scales: {
                 x: {
                     ticks: {
-                        maxTicksLimit: 10,
-                        maxRotation: 0
+                        maxRotation: 45,
+                        minRotation: 45,
+                        autoSkip: true,
+                        maxTicksLimit: window.innerWidth < 768 ? 6 : 12,
+                        font: {
+                            size: window.innerWidth < 768 ? 10 : 12
+                        }
                     },
                     grid: {
                         display: false
@@ -354,6 +396,9 @@ function renderCharts(chartData) {
                     ticks: {
                         callback: function(value) {
                             return value;
+                        },
+                        font: {
+                            size: window.innerWidth < 768 ? 10 : 12
                         }
                     }
                 },
@@ -576,6 +621,9 @@ function updateBasicAnalysisWithAIInsights(basicAnalysis, aiAnalysis) {
 function renderAIAnalysis(analysis) {
     const analysisDiv = document.getElementById('ai-analysis');
     
+    // モバイル向けにテンプレートを調整
+    const isMobile = window.innerWidth < 768;
+    
     // 推奨アクションに基づくスタイル設定
     let actionClass, actionIcon;
     switch(analysis.recommendation?.action) {
@@ -623,15 +671,35 @@ function renderAIAnalysis(analysis) {
     analysisDiv.innerHTML = `
         <div class="row">
             <div class="col-md-8">
-                <h4>AI予測と分析結果 <small class="text-muted">${analysis.date || '---'}</small></h4>
-                
-                <div class="card mb-3 border-primary">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">AI分析結果</h5>
+                        <span class="badge bg-primary">${analysis.date}</span>
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title">AI推奨</h5>
-                        <h3 class="${actionClass}"><strong>${actionIcon || ''} ${analysis.recommendation?.action || '---'}</strong> 
-                            <small>(確信度: ${confidenceStars})</small>
-                        </h3>
-                        <p>${analysis.recommendation?.explanation || '---'}</p>
+                        <!-- モバイル向けにレイアウト調整 -->
+                        <div class="${isMobile ? '' : 'd-flex justify-content-between'}">
+                            <div class="${isMobile ? 'mb-3' : ''}">
+                                <h2 class="mb-0">¥${analysis.price.toLocaleString()}</h2>
+                                <small class="text-muted">最新価格</small>
+                            </div>
+                            <div class="${isMobile ? 'mb-3' : ''}">
+                                <h4 class="mb-0">
+                                    <span class="badge ${getBadgeClass(analysis.recommendation.action)}">
+                                        ${analysis.recommendation.action}
+                                    </span>
+                                </h4>
+                                <small class="text-muted">推奨アクション</small>
+                            </div>
+                            <div>
+                                <h4 class="mb-0">
+                                    <span class="badge bg-info">
+                                        信頼度: ${analysis.recommendation.confidence}
+                                    </span>
+                                </h4>
+                                <small class="text-muted">AI信頼性</small>
+                            </div>
+                        </div>
                         
                         <!-- 分析根拠を表示する折りたたみセクション -->
                         <div class="mt-3">
@@ -825,4 +893,17 @@ function renderAIAnalysis(analysis) {
             </div>
         </div>
     `;
-} 
+}
+
+// ウィンドウサイズ変更時にチャートを再描画
+window.addEventListener('resize', function() {
+    if (priceChart) {
+        priceChart.resize();
+    }
+    if (indicatorChart) {
+        indicatorChart.resize();
+    }
+    if (advancedChart) {
+        advancedChart.resize();
+    }
+}); 

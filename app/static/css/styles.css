@@ -1,0 +1,78 @@
+/* モバイル向け基本スタイル */
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+}
+
+/* コンテナの調整 */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 15px;
+}
+
+/* カードのスタイル調整 */
+.card {
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    font-weight: 500;
+    padding: 12px 15px;
+}
+
+.card-body {
+    padding: 15px;
+}
+
+/* チャートコンテナの高さ設定 */
+.chart-container {
+    position: relative;
+    height: 50vh;
+    min-height: 300px;
+}
+
+/* レスポンシブ設定 */
+@media (max-width: 768px) {
+    .chart-container {
+        height: 40vh;
+        min-height: 250px;
+    }
+    
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+    
+    .table {
+        font-size: 0.9rem;
+    }
+    
+    .table td, .table th {
+        padding: 0.5rem;
+    }
+    
+    /* モバイルでのスクロール対応 */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* モバイルでのタブ表示調整 */
+    .nav-tabs .nav-link {
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+/* タッチ操作の最適化 */
+@media (hover: none) {
+    .btn:active, .nav-link:active {
+        opacity: 0.7;
+    }
+    
+    /* タップ領域の拡大 */
+    .btn, .nav-link, select, input[type="button"] {
+        min-height: 44px;
+    }
+} 
