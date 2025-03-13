@@ -906,4 +906,33 @@ window.addEventListener('resize', function() {
     if (advancedChart) {
         advancedChart.resize();
     }
-}); 
+});
+
+// 推奨アクションに基づいてバッジクラスを返す関数
+function getBadgeClass(action) {
+    switch(action) {
+        case '買い':
+        case '強い買い':
+            return 'bg-success';
+        case '売り':
+        case '強い売り':
+            return 'bg-danger';
+        case '様子見':
+            return 'bg-warning';
+        default:
+            return 'bg-secondary';
+    }
+}
+
+// RSIの値に基づいてバッジクラスを返す関数
+function getRsiBadgeClass(rsi) {
+    if (rsi > 70) return 'bg-danger';
+    if (rsi < 30) return 'bg-success';
+    return 'bg-secondary';
+}
+
+// MACDの値に基づいてバッジクラスを返す関数
+function getMacdBadgeClass(macd, signal) {
+    if (macd > signal) return 'bg-success';
+    return 'bg-danger';
+} 
