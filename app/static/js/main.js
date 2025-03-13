@@ -25,23 +25,15 @@ const chartColors = {
 
 // ページ読み込み時の処理
 document.addEventListener('DOMContentLoaded', () => {
-    // 初期データ取得
+    // 初期データ取得（固定期間）
     fetchData('1y');
     
     // AIベースの詳細分析も初期取得
     fetchAIAnalysis('1y');
     
-    // 期間セレクターのイベントリスナー
-    document.getElementById('period-selector').addEventListener('change', (e) => {
-        console.log("期間変更:", e.target.value);
-        const period = e.target.value;
-        fetchData(period);
-    });
-    
     // AI分析更新ボタンのイベントリスナー
     document.getElementById('refresh-ai-analysis').addEventListener('click', () => {
-        const period = document.getElementById('period-selector').value;
-        fetchAIAnalysis(period);
+        fetchAIAnalysis('1y'); // 固定期間に変更
     });
 
     // タッチ操作の最適化
