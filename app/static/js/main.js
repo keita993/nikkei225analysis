@@ -25,11 +25,8 @@ const chartColors = {
 
 // ページ読み込み時の処理
 document.addEventListener('DOMContentLoaded', () => {
-    // 初期データ取得（固定期間）
+    // 初期データ取得のみ行い、AI分析は基本データ取得の完了後に実行
     fetchData('1y');
-    
-    // AIベースの詳細分析も初期取得
-    fetchAIAnalysis('1y');
     
     // AI分析更新ボタンのイベントリスナー
     document.getElementById('refresh-ai-analysis').addEventListener('click', () => {
@@ -61,10 +58,6 @@ async function fetchData(period) {
     try {
         console.log(`${period} のデータを取得中...`);
         
-        // ローディング表示を削除
-        // document.getElementById('latest-analysis').innerHTML = 
-        //    '<div class="text-center my-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">市場データを取得中...</p></div>';
-        
         // キャッシュを防止するためのタイムスタンプパラメータを追加
         const timestamp = new Date().getTime();
         const response = await fetch(`/api/nikkei/analysis?period=${period}&_t=${timestamp}`);
@@ -82,21 +75,18 @@ async function fetchData(period) {
             showToast("サンプルデータを表示中", "APIからのデータ取得に問題があり、サンプルデータを表示しています。", "warning");
         }
         
-        // 最新分析表示を削除
-        // renderLatestAnalysis(data.latest);
-        renderCharts(data.chart_data);
+        // チャート描画
+        if (data.chart_data && data.chart_data.length > 0) {
+            renderCharts(data.chart_data);
+        }
         
-        // 基本データ取得後にAI分析も取得して両者を統合
-        fetchAIAnalysis(period, data.latest);
+        // 基本データ取得後にAI分析も取得
+        // data.latestが存在する場合のみそれを渡す
+        fetchAIAnalysis(period, data.latest || null);
     } catch (error) {
         console.error('エラーが発生しました:', error);
-        // エラー表示も削除
-        // document.getElementById('latest-analysis').innerHTML = 
-        //    `<div class="alert alert-danger">
-        //        <h5>データ取得エラー</h5>
-        //        <p>${error.message}</p>
-        //        <p>再読み込みするには期間を選択し直してください。</p>
-        //    </div>`;
+        // エラーが発生してもAI分析は実行（サンプルデータが使われる）
+        fetchAIAnalysis(period);
     }
 }
 
@@ -461,46 +451,56 @@ function showToast(title, message, type = 'info') {
     }, 5500);
 }
 
-// AI分析を取得する関数
-async function fetchAIAnalysis(period, basicAnalysis = null) {
+// AIベースの詳細分析を取得する関数
+async function fetchAIAnalysis(period, latestData = null) {
     try {
-        const timestamp = new Date().getTime();
         document.getElementById('ai-analysis').innerHTML = 
-            '<div class="text-center my-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">AIによる高度な市場分析を実行中...</p></div>';
+            '<div class="text-center my-4"><div class="spinner-border text-success" role="status"></div><p class="mt-2">AIによる高度な分析を実行中...</p></div>';
         
-        console.log(`AI分析データを取得中: 期間=${period}`);
+        // リクエストURLをコンソールに出力(デバッグ用)
+        const timestamp = new Date().getTime();
+        const url = `/api/nikkei/ai-analysis?period=${period}&_t=${timestamp}`;
+        console.log("AI分析リクエストURL:", url);
         
-        const response = await fetch(`/api/nikkei/ai-analysis?period=${period}&_t=${timestamp}`);
+        // APIリクエスト(ハイフン付きパスに戻す)
+        const response = await fetch(url);
+        
+        // レスポンスステータスをコンソールに出力(デバッグ用)
         console.log("AI分析レスポンスステータス:", response.status);
         
+        if (!response.ok) {
+            throw new Error(`AI分析データの取得に失敗しました (${response.status})`);
+        }
+        
         const data = await response.json();
-        console.log("AI分析データ:", data);
+        console.log("取得したAI分析データ:", data);
         
-        if (data.error) {
-            throw new Error(data.error || "不明なエラー");
+        // データチェック
+        if (!data.analysis) {
+            throw new Error('AI分析データの形式が不正です');
         }
         
-        if (data.sample) {
-            console.warn("注意: AI分析のサンプルデータを表示しています");
+        // 基本データを統合（latestDataが渡されている場合）
+        if (latestData) {
+            console.log("基本データ統合:", latestData);
+            // データを統合
+            data.analysis.price = latestData.price || data.analysis.price;
+            if (latestData.rsi) data.analysis.indicators.rsi = latestData.rsi;
+            if (latestData.macd) data.analysis.indicators.macd = latestData.macd;
+            if (latestData.signal) data.analysis.indicators.macd_signal = latestData.signal;
         }
         
-        if (data.analysis) {
-            // 基本分析結果が提供されている場合は整合性を調整
-            if (basicAnalysis) {
-                updateBasicAnalysisWithAIInsights(basicAnalysis, data.analysis);
-            }
-            
-            renderAIAnalysis(data.analysis);
-        } else {
-            throw new Error("AI分析データがありません");
-        }
+        // AI分析レンダリング
+        renderAIAnalysis(data.analysis);
+        
     } catch (error) {
-        console.error('AI分析取得エラー:', error);
+        console.error('AI分析でエラーが発生しました:', error);
         document.getElementById('ai-analysis').innerHTML = 
-            `<div class="alert alert-danger">
-                <h5>AI分析の取得中にエラーが発生しました</h5>
+            `<div class="alert alert-warning">
+                <h5>AI分析の取得に失敗しました</h5>
                 <p>${error.message}</p>
-                <p>再試行するには「高度分析を更新」ボタンをクリックしてください。</p>
+                <p>「高度分析を更新」ボタンをクリックして再試行してください。</p>
+                <p class="small text-muted">詳細情報はブラウザのコンソールを確認してください。</p>
             </div>`;
     }
 }
