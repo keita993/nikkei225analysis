@@ -1,0 +1,127 @@
+/* 基本スタイル */
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.card:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background-color: #f1f8ff;
+    font-weight: 600;
+    border-radius: 10px 10px 0 0 !important;
+}
+
+/* チャート関連 */
+canvas {
+    margin-bottom: 15px;
+}
+
+/* 買いシグナル表示 */
+.signal-buy {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.signal-neutral {
+    color: #6c757d;
+}
+
+/* データ読み込み表示 */
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+}
+
+/* チャートコンテナのスタイル */
+#price-chart {
+    height: 300px !important;
+    max-height: 300px !important;
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+#indicator-chart {
+    height: 200px !important;
+    max-height: 200px !important;
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+/* バッジスタイルの改善 */
+.badge {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    padding: 0.5em 0.7em;
+    border-radius: 6px;
+}
+
+/* インジケータ値のスタイル */
+.indicator-value {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+/* RSIのシグナルカラー */
+.rsi-overbought {
+    color: #dc3545;
+}
+
+.rsi-oversold {
+    color: #28a745;
+}
+
+.rsi-neutral {
+    color: #6c757d;
+}
+
+/* AI分析セクションのスタイル強化 */
+#ai-analysis {
+    margin-top: 1rem;
+}
+
+#ai-analysis .card {
+    margin-bottom: 1rem;
+}
+
+#ai-analysis .card-title {
+    font-weight: 600;
+}
+
+/* レスポンシブデザインの改善 */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    #price-chart {
+        height: 300px !important;
+    }
+    
+    #indicator-chart {
+        height: 200px !important;
+    }
+}
+
+/* トースト通知のスタイル */
+.toast {
+    min-width: 300px;
+}
+
+.toast-header {
+    padding: 0.75rem 1rem;
+}
+
+.toast-body {
+    padding: 1rem;
+}
